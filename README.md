@@ -36,20 +36,29 @@
                                                                                                                                                                                                                                         
   로그아웃 → Redis에서 refreshToken 삭제 + 쿠키 만료                                                                                                                                                                                    
                                                                                                                                                                                                                                         
-  ## 프로젝트 구조                                                                                                                                                                                                                      
-                  
-  src/main/java
-  ├── domain/user
-  │   ├── controller   # UserController, PageController
-  │   ├── service      # UserService                                                                                                                                                                                                    
-  │   ├── dto          # 요청/응답 DTO
-  │   ├── model        # User 엔티티                                                                                                                                                                                                    
-  │   └── repository   # UserRepository
-  ├── infra                                                                                                                                                                                                                             
-  │   ├── security     # SecurityConfig, JwtAuthenticationFilter, CookieProvider                                                                                                                                                        
-  │   │   └── jwt      # JwtPlugin, JwtAuthenticationToken
-  │   └── redis        # RefreshTokenService                                                                                                                                                                                            
-  └── common           # GlobalExceptionHandler, ErrorResponse
+  ## 프로젝트 구조                                                                                                                                                                                                                    
+  ```
+  src/main/java                                                                                                                                                                                                                         
+  └── org.example.playground
+      ├── common                                                                                                                                                                                                                        
+      │   ├── dto                         
+      │   │   └── ErrorResponse.java
+      │   └── GlobalExceptionHandler.java                                                                                                                                                                                               
+      ├── domain
+      │   └── user                                                                                                                                                                                                                      
+      │       ├── constant                    
+      │       ├── controller              
+      │       ├── dto
+      │       ├── model                                                                                                                                                                                                                 
+      │       ├── repository
+      │       └── service                                                                                                                                                                                                               
+      ├── infra   
+      │   ├── redis                           
+      │   ├── security                    
+      │   │   └── jwt
+      │   └── swagger                                                                                                                                                                                                                   
+      └── PlaygroundApplication.java
+  ```   
     
   | 클래스 | 역할 |                                                                                                                                                                                                                     
   |---|---|       
