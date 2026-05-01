@@ -48,8 +48,7 @@ public class UserController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<Void> refresh(
-            @CookieValue(name = "refreshToken", required = false) String refreshToken) {
+    public ResponseEntity<Void> refresh(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
 
         if (refreshToken == null) {
             return ResponseEntity.status(401).build();
