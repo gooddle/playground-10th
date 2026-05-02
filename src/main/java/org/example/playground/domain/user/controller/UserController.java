@@ -3,6 +3,7 @@ package org.example.playground.domain.user.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.playground.domain.user.dto.request.SignInRequest;
 import org.example.playground.domain.user.dto.request.SignUpRequest;
+import org.example.playground.domain.user.dto.response.RefreshResult;
 import org.example.playground.domain.user.dto.response.SignInResponse;
 import org.example.playground.domain.user.dto.response.SignInResult;
 import org.example.playground.domain.user.dto.response.SignUpResponse;
@@ -54,10 +55,11 @@ public class UserController {
             return ResponseEntity.status(401).build();
         }
 
-        String newAccessToken = userService.refresh(refreshToken);
+        RefreshResult result = userService.refresh(refreshToken);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookieProvider.createAccessCookie(newAccessToken).toString())
+                .header(HttpHeaders.SET_COOKIE, cookieProvider.createAccessCookie(result.accessToken()).toString())
+                .header(HttpHeaders.SET_COOKIE, cookieProvider.createRefreshCookie(result.refreshToken()).toString())
                 .build();
     }
 }
