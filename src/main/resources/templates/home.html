@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html  lang="">
+<head>
+    <meta charset="UTF-8">
+    <title>홈</title>
+</head>
+<body>
+    <h2>로그인 성공</h2>
+    <p>환영합니다!</p>
+    <button id="logoutBtn">로그아웃</button>
+
+    <script>
+        // accessToken 만료 시 자동 재발급 후 재시도
+        async function fetchWithRefresh(url, options = {}) {
+            let response = await fetch(url, options);
+
+            if (response.status === 401) {
+                const refreshResponse = await fetch('/api/v1/users/refresh', { method: 'POST' });
+
+                if (!refreshResponse.ok) {
+                    // refreshToken도 만료 → 로그인 페이지로
+                    window.location.href = '/login';
+                    return;
+                }
+
+                // 원래 요청 재시도
+                response = await fetch(url, options);
+            }
+
+            return response;
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            const response = await fetchWithRefresh('/api/v1/users/logout', { method: 'POST' });
+
+            if (response.ok) {
+                window.location.href = '/login';
+            }
+        });
+    </script>
+</body>
+</html>
