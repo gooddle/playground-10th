@@ -1,4 +1,4 @@
-package org.example.playground.domain.user.controller;
+package org.example.playground;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,5 +24,20 @@ public class PageController {
     @GetMapping("/home")
     public String homePage() {
         return "home";
+    }
+
+    @GetMapping("/feeds")
+    public String feedListPage() {
+        return "feed-list";
+    }
+
+    @GetMapping("/feeds/new")
+    public String feedCreatePage() {
+        return "feed-create";
+    }
+
+    @GetMapping("/feeds/{feedId}")
+    public String feedDetailPage() {
+        return "feed-detail";
     }
 }
