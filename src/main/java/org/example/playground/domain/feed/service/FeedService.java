@@ -51,7 +51,7 @@ public class FeedService {
     public Page<FeedResponse> getFeedList(
             Long userId,
             Integer size,
-            Integer page       // offset → page
+            Integer page
     ) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not Found"));
