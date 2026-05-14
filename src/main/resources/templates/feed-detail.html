@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 상세</title>
+    <style>
+        body { max-width: 600px; margin: 40px auto; padding: 0 16px; font-family: sans-serif; }
+        .meta { color: #888; font-size: 12px; margin-bottom: 16px; }
+        .content { line-height: 1.6; white-space: pre-wrap; }
+        .buttons { display: flex; gap: 8px; margin-top: 24px; }
+        button { padding: 8px 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2 id="title"></h2>
+    <div class="meta" id="meta"></div>
+    <div class="content" id="body"></div>
+    <div class="buttons">
+        <button onclick="location.href='/feeds'">목록으로</button>
+    </div>
+
+    <script>
+        async function fetchWithRefresh(url, options = {}) {
+            let response = await fetch(url, options);
+            if (response.status === 401) {
+                const refreshResponse = await fetch('/api/v1/users/refresh', { method: 'POST' });
+                if (!refreshResponse.ok) { window.location.href = '/login'; return; }
+                response = await fetch(url, options);
+            }
+            return response;
+        }
+
+        async function loadFeed() {
+            const feedId = location.pathname.split('/').pop();
+            const response = await fetchWithRefresh(`/api/v1/feeds/${feedId}`);
+            if (!response.ok) { location.href = '/feeds'; return; }
+
+            const feed = await response.json();
+            document.getElementById('title').textContent = feed.title;
+            document.getElementById('meta').textContent = `작성일: ${feed.createdAt}`;
+            document.getElementById('body').textContent = feed.body;
+        }
+
+        loadFeed();
+    </script>
+</body>
+</html>

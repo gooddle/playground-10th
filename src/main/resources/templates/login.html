@@ -61,7 +61,7 @@
             });
 
             if (response.ok) {
-                window.location.href = '/home';
+                window.location.href = '/feeds';
             } else {
                 const data = await response.json();
                 const errorMsg = document.getElementById('errorMsg');

@@ -11,21 +11,21 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Entity(name ="feeds")
+@Entity(name = "feeds")
 public class Feed {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "title")
+    @Column(name = "title", length = 500)
     private String title;
 
-    @Column(name = "body")
+    @Column(name = "body", length = 1000)
     private String body;
 
     @Column(name = "created_at")
