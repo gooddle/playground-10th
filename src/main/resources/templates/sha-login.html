@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 (SHA)</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { display: flex; flex-direction: column; gap: 12px; width: 300px; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { padding: 8px; cursor: pointer; }
+        .method-group { display: flex; gap: 16px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>로그인 (SHA)</h2>
+
+        <div class="method-group">
+            <label><input type="radio" name="method" value="db" checked> DB 식별</label>
+            <label><input type="radio" name="method" value="db-hash"> DB 해싱+식별</label>
+            <label><input type="radio" name="method" value="java"> Java 식별</label>
+        </div>
+
+        <p id="errorMsg" style="color: red; display: none;"></p>
+
+        <form id="loginForm">
+            <div>
+                <label>이메일</label>
+                <input type="text" id="email" name="email" />
+            </div>
+            <div>
+                <label>비밀번호</label>
+                <input type="password" id="password" name="password" />
+            </div>
+            <button type="submit">로그인</button>
+        </form>
+        <a href="/sha-signup">회원가입</a>
+
+        <script>
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const method = document.querySelector('input[name="method"]:checked').value;
+                const apiUrl = `/api/v1/sha-users/signIn/${method}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value
+                    })
+                });
+
+                if (response.ok) {
+                    window.location.href = '/feeds';
+                } else {
+                    const data = await response.json();
+                    const errorMsg = document.getElementById('errorMsg');
+                    errorMsg.textContent = data.message;
+                    errorMsg.style.display = 'block';
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>

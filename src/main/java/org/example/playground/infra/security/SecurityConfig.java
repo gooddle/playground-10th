@@ -55,15 +55,54 @@ public class SecurityConfig {
                                 "/",
                                 "/login",
                                 "/signup",
+                                "/sha-login",
+                                "/sha-signup",
+                                "/unhash-login",
+                                "/unhash-signup",
+                                "/combined-login",
+                                "/combined-signup",
                                 "/favicon.ico",
                                 "/index.html",
                                 "/api/v1/users/signIn",
                                 "/api/v1/users/signup",
                                 "/api/v1/users/refresh",
+                                "/api/v1/sha-users/signIn/db",
+                                "/api/v1/sha-users/signIn/db-hash",
+                                "/api/v1/sha-users/signIn/java",
+                                "/api/v1/sha-users/signup",
+                                "/api/v1/sha-users/refresh",
+                                "/api/v1/unhash-users/signIn/db",
+                                "/api/v1/unhash-users/signIn/java",
+                                "/api/v1/unhash-users/signup",
+                                "/api/v1/unhash-users/refresh",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/api/v1/send-email-code"
                         ).permitAll()
+
+                        // ── 분리하는 경우 ──────────────────────────────────────────
+                        // SHA 토큰만 sha-users API 접근 가능, UNHASH 토큰만 unhash-users API 접근 가능
+                        .requestMatchers("/api/v1/sha-users/**")
+                            .access((authentication, context) -> {
+                                var auth = authentication.get();
+                                boolean isSha = auth != null && auth.isAuthenticated()
+                                        && auth.getPrincipal() instanceof org.example.playground.infra.security.UserPrincipal p
+                                        && "SHA".equals(p.userType());
+                                return new org.springframework.security.authorization.AuthorizationDecision(isSha);
+                            })
+                        .requestMatchers("/api/v1/unhash-users/**")
+                            .access((authentication, context) -> {
+                                var auth = authentication.get();
+                                boolean isUnhash = auth != null && auth.isAuthenticated()
+                                        && auth.getPrincipal() instanceof org.example.playground.infra.security.UserPrincipal p
+                                        && "UNHASH".equals(p.userType());
+                                return new org.springframework.security.authorization.AuthorizationDecision(isUnhash);
+                            })
+
+                        // ── 같이하는 경우 ──────────────────────────────────────────
+                        // sha/unhash 유저 모두 같은 리소스 접근 가능 → 위 두 줄 삭제하고 아래 한 줄만 사용
+                        // .anyRequest().authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

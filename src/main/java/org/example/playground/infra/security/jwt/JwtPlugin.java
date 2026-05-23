@@ -54,15 +54,15 @@ public class JwtPlugin {
         }
     }
 
-    public String generateAccessToken(String subject, String role, String userName) {
-        return generateToken(subject, role, userName, Duration.ofHours(accessTokenExpirationHour));
+    public String generateAccessToken(String subject, String role, String userName, String userType) {
+        return generateToken(subject, role, userName, userType, Duration.ofHours(accessTokenExpirationHour));
     }
 
     public String generateRefreshToken(String subject) {
-        return generateToken(subject, null, null, Duration.ofDays(refreshTokenExpirationDay));
+        return generateToken(subject, null, null, null, Duration.ofDays(refreshTokenExpirationDay));
     }
 
-    private String generateToken(String subject, String role, String userName, Duration expirationPeriod) {
+    private String generateToken(String subject, String role, String userName, String userType, Duration expirationPeriod) {
         Claims claims = Jwts.claims()
                 .setSubject(subject)
                 .setIssuer(issuer)
@@ -71,6 +71,7 @@ public class JwtPlugin {
 
         if (role != null) claims.put("role", role);
         if (userName != null) claims.put("userName", userName);
+        if (userType != null) claims.put("userType", userType);
 
         SecretKey key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
 
