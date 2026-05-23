@@ -40,4 +40,34 @@ public class PageController {
     public String feedDetailPage() {
         return "feed-detail";
     }
+
+    @GetMapping("/sha-login")
+    public String shaLoginPage() {
+        return "sha-login";
+    }
+
+    @GetMapping("/sha-signup")
+    public String shaSignupPage() {
+        return "sha-signup";
+    }
+
+    @GetMapping("/unhash-login")
+    public String unhashLoginPage() {
+        return "unhash-login";
+    }
+
+    @GetMapping("/unhash-signup")
+    public String unhashSignupPage() {
+        return "unhash-signup";
+    }
+
+    @GetMapping("/combined-login")
+    public String combinedLoginPage() {
+        return "combined-login";
+    }
+
+    @GetMapping("/combined-signup")
+    public String combinedSignupPage() {
+        return "combined-signup";
+    }
 }

@@ -26,13 +26,14 @@ import java.util.stream.Collectors;
 public record UserPrincipal(
         Long id,
         String username,
+        String userType,
         Collection<? extends GrantedAuthority> authorities
 ) {
-    // 커스텀 생성자 (ID, 이름, 역할 세트를 받아서 변환)
-    public UserPrincipal(Long id, String username, Set<String> roles) {
+    public UserPrincipal(Long id, String username, String userType, Set<String> roles) {
         this(
                 id,
                 username,
+                userType,
                 roles.stream()
                         .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                         .collect(Collectors.toSet())

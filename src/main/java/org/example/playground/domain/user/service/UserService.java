@@ -71,7 +71,8 @@ public class UserService {
         String accessToken = jwtPlugin.generateAccessToken(
                 user.getId().toString(),
                 user.getRole(),
-                user.getEmail()
+                user.getEmail(),
+                "BASIC"
         );
 
         String refreshToken = jwtPlugin.generateRefreshToken(user.getId().toString());
@@ -102,7 +103,7 @@ public class UserService {
         User user = userRepository.findById(Long.parseLong(userId))
                 .orElseThrow(() -> new BadCredentialsException("유효하지 않은 토큰입니다."));
 
-        String newAccessToken = jwtPlugin.generateAccessToken(userId, user.getRole(), user.getEmail());
+        String newAccessToken = jwtPlugin.generateAccessToken(userId, user.getRole(), user.getEmail(), "BASIC");
         String newRefreshToken = jwtPlugin.generateRefreshToken(userId);
 
         // 기존 refreshToken 삭제 후 새 refreshToken 저장

@@ -9,6 +9,16 @@
         .content { line-height: 1.6; white-space: pre-wrap; }
         .buttons { display: flex; gap: 8px; margin-top: 24px; }
         button { padding: 8px 16px; cursor: pointer; }
+
+        .comment-section { margin-top: 40px; border-top: 2px solid #ddd; padding-top: 20px; }
+        .comment-section h3 { margin-bottom: 16px; }
+        .comment-item { border-bottom: 1px solid #eee; padding: 10px 0; font-size: 14px; }
+        .comment-item .comment-body { margin-bottom: 4px; }
+        .comment-item .comment-meta { color: #aaa; font-size: 11px; }
+        .comment-form { display: flex; gap: 8px; margin-top: 16px; }
+        .comment-form textarea { flex: 1; padding: 8px; resize: vertical; height: 60px; font-family: sans-serif; font-size: 14px; }
+        .comment-form button { align-self: flex-end; white-space: nowrap; }
+        #commentList .empty { color: #aaa; font-size: 14px; padding: 10px 0; }
     </style>
 </head>
 <body>
@@ -19,7 +29,18 @@
         <button onclick="location.href='/feeds'">목록으로</button>
     </div>
 
+    <div class="comment-section">
+        <h3>댓글 <span id="commentCount"></span></h3>
+        <div id="commentList"></div>
+        <div class="comment-form">
+            <textarea id="commentBody" placeholder="댓글을 입력하세요"></textarea>
+            <button onclick="submitComment()">등록</button>
+        </div>
+    </div>
+
     <script>
+        const feedId = location.pathname.split('/').pop();
+
         async function fetchWithRefresh(url, options = {}) {
             let response = await fetch(url, options);
             if (response.status === 401) {
@@ -31,7 +52,6 @@
         }
 
         async function loadFeed() {
-            const feedId = location.pathname.split('/').pop();
             const response = await fetchWithRefresh(`/api/v1/feeds/${feedId}`);
             if (!response.ok) { location.href = '/feeds'; return; }
 
@@ -41,7 +61,54 @@
             document.getElementById('body').textContent = feed.body;
         }
 
+        async function loadComments() {
+            const response = await fetchWithRefresh(`/api/v1/comments?feedId=${feedId}`);
+            if (!response || !response.ok) return;
+
+            const comments = await response.json();
+            const list = document.getElementById('commentList');
+            list.innerHTML = '';
+
+            document.getElementById('commentCount').textContent = `(${comments.length})`;
+
+            if (comments.length === 0) {
+                list.innerHTML = '<div class="empty">아직 댓글이 없습니다.</div>';
+                return;
+            }
+
+            comments.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'comment-item';
+                div.innerHTML = `
+                    <div class="comment-body">${escapeHtml(c.body)}</div>
+                    <div class="comment-meta">${c.createdAt ?? ''}</div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        async function submitComment() {
+            const body = document.getElementById('commentBody').value.trim();
+            if (!body) return;
+
+            const response = await fetchWithRefresh('/api/v1/comments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ feedId: Number(feedId), body })
+            });
+
+            if (!response || !response.ok) { alert('댓글 등록에 실패했습니다.'); return; }
+
+            document.getElementById('commentBody').value = '';
+            loadComments();
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
         loadFeed();
+        loadComments();
     </script>
 </body>
 </html>
