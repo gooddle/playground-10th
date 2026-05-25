@@ -26,11 +26,39 @@
     </div>
 
     <script>
+        function getRefreshUrl() {
+            const t = localStorage.getItem('userType');
+            if (t === 'SHA') return '/api/v1/sha-users/refresh';
+            if (t === 'UNHASH') return '/api/v1/unhash-users/refresh';
+            return '/api/v1/users/refresh';
+        }
+
         async function fetchWithRefresh(url, options = {}) {
+            const token = localStorage.getItem('accessToken');
+            options = { ...options, headers: { 'Authorization': `Bearer ${token}`, ...(options.headers || {}) } };
+
             let response = await fetch(url, options);
             if (response.status === 401) {
-                const refreshResponse = await fetch('/api/v1/users/refresh', { method: 'POST' });
-                if (!refreshResponse.ok) { window.location.href = '/login'; return; }
+                const refreshToken = localStorage.getItem('refreshToken');
+                if (!refreshToken) { window.location.href = '/login'; return; }
+
+                const refreshResponse = await fetch(getRefreshUrl(), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken })
+                });
+
+                if (!refreshResponse.ok) {
+                    localStorage.clear();
+                    window.location.href = '/login';
+                    return;
+                }
+
+                const refreshData = await refreshResponse.json();
+                localStorage.setItem('accessToken', refreshData.accessToken);
+                localStorage.setItem('refreshToken', refreshData.refreshToken);
+
+                options = { ...options, headers: { 'Authorization': `Bearer ${refreshData.accessToken}`, ...(options.headers || {}) } };
                 response = await fetch(url, options);
             }
             return response;

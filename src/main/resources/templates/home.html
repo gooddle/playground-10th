@@ -10,30 +10,56 @@
     <button id="logoutBtn">로그아웃</button>
 
     <script>
-        // accessToken 만료 시 자동 재발급 후 재시도
-        async function fetchWithRefresh(url, options = {}) {
-            let response = await fetch(url, options);
+        function getRefreshUrl() {
+            const result = localStorage.getItem('userType');
+            if (result === 'SHA') return '/api/v1/sha-users/refresh';
+            if (result === 'UNHASH') return '/api/v1/unhash-users/refresh';
+            return '/api/v1/users/refresh';
+        }
 
+        async function fetchWithRefresh(url, options = {}) {
+            const token = localStorage.getItem('accessToken');
+            options = { ...options, headers: { 'Authorization': `Bearer ${token}`, ...(options.headers || {}) } };
+
+            let response = await fetch(url, options);
             if (response.status === 401) {
-                const refreshResponse = await fetch('/api/v1/users/refresh', { method: 'POST' });
+                const refreshToken = localStorage.getItem('refreshToken');
+                if (!refreshToken) { window.location.href = '/login'; return; }
+
+                const refreshResponse = await fetch(getRefreshUrl(), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken })
+                });
 
                 if (!refreshResponse.ok) {
-                    // refreshToken도 만료 → 로그인 페이지로
+                    localStorage.clear();
                     window.location.href = '/login';
                     return;
                 }
 
-                // 원래 요청 재시도
+                const refreshData = await refreshResponse.json();
+                localStorage.setItem('accessToken', refreshData.accessToken);
+                localStorage.setItem('refreshToken', refreshData.refreshToken);
+
+                options = { ...options, headers: { 'Authorization': `Bearer ${refreshData.accessToken}`, ...(options.headers || {}) } };
                 response = await fetch(url, options);
             }
-
             return response;
         }
 
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            const response = await fetchWithRefresh('/api/v1/users/logout', { method: 'POST' });
+        function getLogoutUrl() {
+            const t = localStorage.getItem('userType');
+            if (t === 'SHA') return '/api/v1/sha-users/logout';
+            if (t === 'UNHASH') return '/api/v1/unhash-users/logout';
+            return '/api/v1/users/logout';
+        }
 
-            if (response.ok) {
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            const response = await fetchWithRefresh(getLogoutUrl(), { method: 'POST' });
+
+            if (response && response.ok) {
+                localStorage.clear();
                 window.location.href = '/login';
             }
         });

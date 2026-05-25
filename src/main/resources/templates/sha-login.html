@@ -53,6 +53,10 @@
                 });
 
                 if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('accessToken', data.accessToken);
+                    localStorage.setItem('refreshToken', data.refreshToken);
+                    localStorage.setItem('userType', 'SHA');
                     window.location.href = '/feeds';
                 } else {
                     const data = await response.json();
